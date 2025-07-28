@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { CompanyService } from '@/company/company.service';
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 import { RegisterCompanyDto } from '@/company/dto/company.dto';
@@ -30,13 +38,22 @@ export class CompanyController {
   @Get()
   async getCompanies(@Req() req: any) {
     const userId = req.user.id;
-    console.log('🚀 ~ CompanyController ~ getCompanies ~ userId:', userId);
 
     const result = await this.companyService.getCompanies(userId);
 
     return {
       success: true,
       result,
+    };
+  }
+
+  // get company by id
+  @Get(':id')
+  async getCompanyByid(@Param('id') companyId: string) {
+    const company = await this.companyService.getCompanyById(companyId);
+    return {
+      success: true,
+      company,
     };
   }
 }

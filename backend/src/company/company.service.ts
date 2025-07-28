@@ -43,4 +43,17 @@ export class CompanyService {
 
     return companies;
   }
+
+  // get company by id
+  async getCompanyById(id: string) {
+    const company = await this.prisma.company.findUnique({
+      where: { id },
+    });
+
+    if (!company) {
+      throw new NotFoundException('Company not found');
+    }
+
+    return company;
+  }
 }
