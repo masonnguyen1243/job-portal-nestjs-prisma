@@ -60,4 +60,31 @@ export class UsersService {
 
     return { user, success: true, message: 'User registered successfully' };
   }
+
+  async login(email: string, password: string, role: string) {
+    if (!email || !password || !role) {
+      throw new BadRequestException('All fields are required');
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      throw new BadRequestException('User not exist');
+    }
+
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    if (!isPasswordMatch) {
+      throw new BadRequestException('Invalid credentials');
+    }
+
+    if (role !== user.role) {
+      throw new BadRequestException('Role mismatch');
+    }
+
+    const token = this.jwtService.sign(
+      { userId: user.id },
+      { secret: process.env.JWT_SECRET, expiresIn: '1h' },
+    );
+
+    return { success: true, message: 'Login successful', user, token };
+  }
 }
