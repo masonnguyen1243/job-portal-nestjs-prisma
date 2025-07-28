@@ -7,6 +7,8 @@ import {
   UseGuards,
   Req,
   Put,
+  Delete,
+  Param,
 } from '@nestjs/common';
 import { UsersService } from '@/users/users.service';
 import { RegisterUserDto, UpdateUserDto } from '@/users/dto/user.dto';
@@ -75,6 +77,26 @@ export class UsersController {
         message: 'Profile updated successfully',
         success: true,
         user,
+      });
+    } catch (error) {
+      return res.status(error.status || 500).json({
+        message: error.message || 'Internal Server Error',
+        success: false,
+      });
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  async deleteUser(@Param('id') id: string, @Res() res: Response) {
+    try {
+      console.log(id);
+
+      await this.usersService.deleteUser(id);
+
+      return res.status(200).json({
+        success: true,
+        message: `User with ID ${id} deleted successfully`,
       });
     } catch (error) {
       return res.status(error.status || 500).json({

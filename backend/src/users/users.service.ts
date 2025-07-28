@@ -1,5 +1,9 @@
 import { PrismaService } from '@/prisma.service';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterUserDto, UpdateUserDto } from '@/users/dto/user.dto';
 import * as bcrypt from 'bcrypt';
@@ -132,5 +136,17 @@ export class UsersService {
     });
 
     return user;
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    try {
+      console.log(`Deleting user with ID: ${id}`);
+
+      await this.prisma.user.delete({
+        where: { id },
+      });
+    } catch (error) {
+      throw new NotFoundException(`User with ID ${id} does not exist`);
+    }
   }
 }
