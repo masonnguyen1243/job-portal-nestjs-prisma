@@ -1,7 +1,7 @@
 import { PrismaService } from '@/prisma.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { RegisterUserDto } from '@/users/dto/user.dto';
+import { RegisterUserDto, UpdateUserDto } from '@/users/dto/user.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -90,5 +90,47 @@ export class UsersService {
 
   async logout(): Promise<{ message: string; success: boolean }> {
     return { message: 'User logged out successfully', success: true };
+  }
+
+  async updateProfile(id: string, updateUserDto: UpdateUserDto) {
+    const {
+      fullName,
+      email,
+      phoneNumber,
+      profileBio,
+      profileSkill,
+      profileResume,
+      profileResumeOriginalName,
+      profilePhoto,
+    } = updateUserDto;
+
+    if (
+      !fullName ||
+      !email ||
+      !phoneNumber ||
+      !profileBio ||
+      !profileSkill ||
+      !profileResume ||
+      !profileResumeOriginalName ||
+      !profilePhoto
+    ) {
+      throw new BadRequestException('Required fields are missing');
+    }
+
+    const user = await this.prisma.user.update({
+      where: { id },
+      data: {
+        fullName,
+        email,
+        phoneNumber,
+        profileBio,
+        profileSkill,
+        profileResume,
+        profileResumeOriginalName,
+        profilePhoto,
+      },
+    });
+
+    return user;
   }
 }

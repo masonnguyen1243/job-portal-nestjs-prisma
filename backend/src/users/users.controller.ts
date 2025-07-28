@@ -1,7 +1,17 @@
-import { Controller, Post, Body, Res, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Res,
+  Get,
+  UseGuards,
+  Req,
+  Put,
+} from '@nestjs/common';
 import { UsersService } from '@/users/users.service';
-import { RegisterUserDto } from '@/users/dto/user.dto';
+import { RegisterUserDto, UpdateUserDto } from '@/users/dto/user.dto';
 import { Response } from 'express';
+import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -41,6 +51,31 @@ export class UsersController {
       res.clearCookie('accessToken');
 
       return res.status(200).json(result);
+    } catch (error) {
+      return res.status(error.status || 500).json({
+        message: error.message || 'Internal Server Error',
+        success: false,
+      });
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('updateProfile')
+  async updateProfile(
+    @Req() req: any,
+    @Res() res: Response,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    try {
+      const userId = req.user.id;
+
+      const user = await this.usersService.updateProfile(userId, updateUserDto);
+
+      return res.status(200).json({
+        message: 'Profile updated successfully',
+        success: true,
+        user,
+      });
     } catch (error) {
       return res.status(error.status || 500).json({
         message: error.message || 'Internal Server Error',
