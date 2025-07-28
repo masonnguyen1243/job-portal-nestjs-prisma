@@ -87,4 +87,8 @@ export class UsersService {
 
     return { success: true, message: 'Login successful', user, token };
   }
+
+  async logout(): Promise<{ message: string; success: boolean }> {
+    return { message: 'User logged out successfully', success: true };
+  }
 }
