@@ -1,5 +1,5 @@
 import { PrismaService } from '@/prisma.service';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { RegisterCompanyDto } from '@/company/dto/company.dto';
 
 @Injectable()
@@ -32,5 +32,15 @@ export class CompanyService {
     });
 
     return company;
+  }
+
+  async getCompanies(userId: string) {
+    const companies = await this.prisma.company.findMany({ where: { userId } });
+
+    if (!companies || companies?.length === 0) {
+      throw new NotFoundException('No companies found for this user');
+    }
+
+    return companies;
   }
 }

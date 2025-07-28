@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { CompanyService } from '@/company/company.service';
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 import { RegisterCompanyDto } from '@/company/dto/company.dto';
@@ -22,6 +22,20 @@ export class CompanyController {
     return {
       message: 'Company registered successfully',
       succcess: true,
+      result,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get()
+  async getCompanies(@Req() req: any) {
+    const userId = req.user.id;
+    console.log('🚀 ~ CompanyController ~ getCompanies ~ userId:', userId);
+
+    const result = await this.companyService.getCompanies(userId);
+
+    return {
+      success: true,
       result,
     };
   }
