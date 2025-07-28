@@ -10,11 +10,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly configService: ConfigService,
     private prisma: PrismaService,
   ) {
-    // Lấy JWT_SECRET từ ConfigService
     const jwtSecret = configService.get<string>('JWT_SECRET');
 
-    // **QUAN TRỌNG:** Kiểm tra xem JWT_SECRET có tồn tại không.
-    // Nếu không, hãy ném lỗi để ngăn ứng dụng khởi động với cấu hình sai.
     if (!jwtSecret) {
       throw new Error(
         'JWT_SECRET is not defined in the environment variables. Please set it.',
