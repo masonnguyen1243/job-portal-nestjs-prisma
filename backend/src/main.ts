@@ -8,6 +8,8 @@ async function bootstrap() {
 
   const port = configService.get('PORT');
 
+  app.setGlobalPrefix('api/v1', { exclude: [''] });
+
   //config cors
   app.enableCors({
     origin: true,

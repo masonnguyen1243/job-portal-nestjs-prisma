@@ -1,26 +1,63 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from '@/users/dto/create-user.dto';
-import { UpdateUserDto } from '@/users/dto/update-user.dto';
+import { PrismaService } from '@/prisma.service';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { RegisterUserDto } from '@/users/dto/user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
-  }
+  constructor(
+    private prisma: PrismaService,
+    private jwtService: JwtService,
+  ) {}
 
-  findAll() {
-    return `This action returns all users`;
-  }
+  async register(registerUserDto: RegisterUserDto) {
+    const {
+      fullName,
+      email,
+      phoneNumber,
+      password,
+      profileBio,
+      profileSkill,
+      profileResume,
+      profileResumeOriginalName,
+      profilePhoto,
+      role,
+    } = registerUserDto;
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
+    if (!fullName || !email || !phoneNumber || !password) {
+      throw new BadRequestException('Required fields are missing');
+    }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+    if (existingUser) {
+      throw new BadRequestException('User with this email already exists');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await this.prisma.user.create({
+      data: {
+        fullName,
+        email,
+        phoneNumber,
+        password: hashedPassword,
+        profileBio,
+        profileSkill,
+        profileResume,
+        profileResumeOriginalName,
+        profilePhoto,
+        role,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User registration failed');
+    }
+
+    return { user, success: true, message: 'User registered successfully' };
   }
 }
