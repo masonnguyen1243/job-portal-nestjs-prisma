@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -54,6 +55,17 @@ export class CompanyController {
     return {
       success: true,
       company,
+    };
+  }
+
+  // delete company
+  @Delete(':id')
+  async deleteCompany(@Param('id') companyId: string) {
+    const result = await this.companyService.deleteCompany(companyId);
+    return {
+      result,
+      success: true,
+      message: 'Company deleted successfylly',
     };
   }
 }
