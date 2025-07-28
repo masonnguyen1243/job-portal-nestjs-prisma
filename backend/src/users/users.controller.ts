@@ -14,16 +14,19 @@ import { UsersService } from '@/users/users.service';
 import { RegisterUserDto, UpdateUserDto } from '@/users/dto/user.dto';
 import { Response } from 'express';
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
+import { Public } from '@/decorators/customize';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Public()
   @Post('register')
   async register(@Body() registerUserDto: RegisterUserDto) {
     return this.usersService.register(registerUserDto);
   }
 
+  @Public()
   @Post('login')
   async login(@Body() body, @Res() res: Response) {
     const { email, password, role } = body;
@@ -45,6 +48,7 @@ export class UsersController {
     }
   }
 
+  @Public()
   @Get('logout')
   async logout(@Res() res: Response) {
     try {
@@ -96,6 +100,20 @@ export class UsersController {
         success: true,
         message: `User with ID ${id} deleted successfully`,
       });
+    } catch (error) {
+      return res.status(error.status || 500).json({
+        message: error.message || 'Internal Server Error',
+        success: false,
+      });
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  async profile(@Req() req: any, @Res() res: Response) {
+    try {
+      const result = await this.usersService.profile(req.user.id);
+      return res.status(200).json({ success: true, result });
     } catch (error) {
       return res.status(error.status || 500).json({
         message: error.message || 'Internal Server Error',

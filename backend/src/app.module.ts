@@ -13,9 +13,16 @@ import { ApplicationService } from '@/application/application.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from '@/auth/jwt.strategy';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 
 @Module({
   imports: [
+    UsersModule,
+    CompanyModule,
+    JobModule,
+    ApplicationModule,
+    ConfigModule.forRoot({ isGlobal: true }),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -28,11 +35,6 @@ import { JwtStrategy } from '@/auth/jwt.strategy';
       }),
       inject: [ConfigService],
     }),
-    UsersModule,
-    CompanyModule,
-    JobModule,
-    ApplicationModule,
-    ConfigModule.forRoot({ isGlobal: true }),
   ],
   controllers: [AppController, UsersController],
   providers: [
@@ -41,6 +43,10 @@ import { JwtStrategy } from '@/auth/jwt.strategy';
     JwtStrategy,
     ApplicationService,
     PrismaService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard, // Ensure JwtAuthGuard is used globally
+    },
   ],
 })
 export class AppModule {}

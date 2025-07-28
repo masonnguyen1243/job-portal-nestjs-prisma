@@ -147,4 +147,13 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${id} does not exist`);
     }
   }
+
+  async profile(id: string) {
+    const user = this.prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    return user;
+  }
 }
