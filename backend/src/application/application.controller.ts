@@ -1,45 +1,46 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Req } from '@nestjs/common';
 import { ApplicationService } from '@/application/application.service';
-import { CreateApplicationDto } from '@/application/dto/create-application.dto';
-import { UpdateApplicationDto } from '@/application/dto/update-application.dto';
+import { UpdateStatusDto } from '@/application/dto/application.dto';
 
 @Controller('application')
 export class ApplicationController {
   constructor(private readonly applicationService: ApplicationService) {}
 
-  @Post()
-  create(@Body() createApplicationDto: CreateApplicationDto) {
-    return this.applicationService.create(createApplicationDto);
+  @Post(':id')
+  async applyJob(@Req() req: any, @Param('id') jobId: string) {
+    const userid = req.user.id;
+    const application = await this.applicationService.applyJob(userid, jobId);
+
+    return { message: 'Job Applied successfully', application, success: true };
   }
 
   @Get()
-  findAll() {
-    return this.applicationService.findAll();
+  async getAppliedJobs(@Req() req: any) {
+    const userId = req.user.id;
+    const applications = await this.applicationService.getAppliedJobs(userId);
+    return { applications, success: true };
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.applicationService.findOne(+id);
+  async getApplicants(@Param('id') jobId: string) {
+    const job = await this.applicationService.getApplicants(jobId);
+    return { job, success: true };
   }
 
-  @Patch(':id')
-  update(
+  @Put('update-status/:id')
+  async updateStatus(
     @Param('id') id: string,
-    @Body() updateApplicationDto: UpdateApplicationDto,
+    @Body() updateStatusDto: UpdateStatusDto,
   ) {
-    return this.applicationService.update(+id, updateApplicationDto);
-  }
+    const updatedApplication = await this.applicationService.updateStatus(
+      id,
+      updateStatusDto,
+    );
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.applicationService.remove(+id);
+    return {
+      message: 'Status updated successfully',
+      updatedApplication,
+      success: true,
+    };
   }
 }
